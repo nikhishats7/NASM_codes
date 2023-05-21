@@ -1,0 +1,1776 @@
+read_array:
+pusha
+read_array_loop:
+call read_num
+mov cx, word[num]
+mov word[ebx+2*eax], cx
+inc eax
+cmp eax, dword[n]
+je end_read_array
+jmp read_array_loop
+end_read_array:
+popa
+ret
+
+print_array:
+pusha
+print_array_loop:
+mov cx, word[ebx+2*eax]
+mov word[num], cx
+call print_num
+inc eax
+cmp eax, dword[n]
+je end_print_array
+jmp print_array_loop
+end_print_array:
+popa
+ret
+
+
+
+read_string:
+pusha
+read:
+pusha
+mov eax, 3
+mov ebx, 0
+mov ecx, temp
+mov edx, 1
+int 80h
+popa
+cmp byte[temp], 10
+je end_read
+mov al, byte[temp]
+mov byte[ebx], al
+inc ebx
+jmp read
+end_read:
+mov byte[ebx], 0
+popa
+ret
+
+print_string:
+pusha
+print:
+mov al, byte[ebx]
+mov byte[temp], al
+cmp byte[temp], 0
+je end_print
+pusha
+mov eax, 4
+mov ebx, 1
+mov ecx, temp
+mov edx, 1
+int 80h
+popa
+inc ebx
+jmp print
+end_print:
+popa
+ret
+
+
+read_matrix:
+pusha
+mov word[i], 0
+mov word[j], 0
+i_loop:
+mov word[j], 0
+j_loop:
+call read_num
+mov cx, word[num]
+mov word[ebx+2*eax], cx
+inc eax
+inc word[j]
+mov cx, word[j]
+cmp cx, word[col]
+jb j_loop
+
+inc word[i]
+mov cx, word[i]
+cmp cx, word[row]
+jb j_loop
+
+read_num:
+pusha
+mov word[num], 0
+loop_read:
+mov eax, 3
+mov ebx, 0
+mov ecx, temp
+mov edx, 1
+int 80h
+cmp byte[temp], 10
+je end_read
+mov ax, word[num]
+mov bx, 10
+mul bx
+
+mov bl, byte[temp]
+sub bl, 30h
+mov bh, 0
+add ax, bx
+mov word[num], ax
+jmp loop_read
+
+end_read:
+popa
+ret
+
+print_num:
+mov byte[count], 0
+pusha
+
+extract:
+cmp word[num], 0
+je print_no
+inc byte[count]
+mov dx, 0
+mov ax, word[num]
+mov bx, 10
+div bx
+push dx
+mov word[num], ax
+jmp extract
+
+print_no:
+cmp byte[count], 0
+je end_print
+dec byte[count]
+pop dx
+mov byte[temp], dl
+add byte[temp], 30h
+mov eax, 4
+mov ebx, 1
+mov ecx, temp
+mov edx, 1
+int 80h
+jmp print_no
+
+end_print:
+mov eax, 4
+mov ebx, 1
+mov ecx, newline
+mov edx, 1
+int 80h
+
+popa 
+ret
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+;;high occ
+
+section .data
+msg1: db 'enter'
+l1: equ $-msg1
+newline db 10
+
+section .bss
+array: resw 50
+num: resw 1
+temp: resb 10
+count: resb 10
+n: resd 1
+high_count: resw 1
+count1: resw 1
+ele: resw 1
+ind1: resw 1
+ind2: resw 1
+
+section .text
+global _start:
+_start:
+
+mov eax, 4
+mov ebx, 1
+mov ecx, msg1
+mov edx, l1
+int 80h
+
+call read_num
+mov cx, word[num]
+mov word[n], cx
+
+mov eax, 4
+mov ebx, 1
+mov ecx, msg1
+mov edx, l1
+int 80h
+
+mov ebx, array
+mov eax, 0
+call read_array
+
+mov word[ind1], 0
+mov word[ind2], 0
+mov word[high_count], 0
+
+mov ebx, array
+loop1:
+mov word[ind2], 0
+mov word[count1], 0
+mov dx, word[ebx]
+mov eax, array
+loop2:
+cmp dx, word[eax]
+je inc_count
+jmp f
+inc_count:
+inc word[count1]
+f:
+inc word[ind2]
+mov cx, word[ind2]
+cmp cx, word[n]
+jb loop2
+
+mov cx, word[count1]
+cmp cx, word[high_count]
+ja update
+jmp f2
+update:
+mov word[high_count], cx
+mov word[ele], dx
+f2:
+inc word[ind1]
+mov cx, word[ind1]
+cmp cx, word[n]
+jb loop1
+
+mov cx, word[ele]
+mov word[num], cx
+call print_num
+
+mov eax, 1
+mov ebx, 0
+int 80h
+
+read_num:
+pusha
+mov word[num], 0
+
+loop_read:
+mov eax, 3
+mov ebx, 0
+mov ecx, temp
+mov edx, 1
+int 80h
+
+cmp byte[temp], 10
+je end_read
+mov ax, word[num]
+mov bx, 10
+mul bx
+
+mov bl, byte[temp]
+sub bl, 30h
+mov bh, 0
+add ax, bx
+mov word[num], ax
+jmp loop_read
+
+end_read:
+popa
+ret
+
+print_num:
+mov byte[count], 0
+pusha
+
+extract:
+cmp word[num], 0
+je print_no
+inc byte[count]
+mov dx, 0
+mov ax, word[num]
+mov bx, 10
+div bx
+push dx
+mov word[num], ax
+jmp extract
+
+print_no:
+cmp byte[count], 0
+je end_print
+dec byte[count]
+pop dx
+mov byte[temp], dl
+add byte[temp], 30h
+mov eax, 4
+mov ebx, 1
+mov ecx, temp
+mov edx, 1
+int 80h
+jmp print_no
+
+end_print:
+mov eax, 4
+mov ebx, 1
+mov ecx, newline
+mov edx, 1
+int 80h
+
+popa 
+ret
+
+read_array:
+pusha
+read_loop:
+call read_num
+mov cx,word[num]
+mov word[ebx+2*eax],cx
+inc eax
+
+cmp eax,dword[n]
+je end1_read
+jmp read_loop
+end1_read:
+popa
+ret
+
+
+print_array:
+pusha
+print_loop:
+cmp eax,dword[n]
+je end1_print
+mov cx,word[ebx+2*eax]
+mov word[num],cx
+
+call print_num
+inc eax
+jmp print_loop
+end1_print:
+popa
+ret
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Q1)
+
+section .data
+newline:db 10
+msg1:db 'even'
+l1: equ $-msg1
+msg2:db 'odd'
+l2: equ $-msg2
+
+section .bss
+num: resw 1
+n: resd 1
+temp: resb 1
+count: resb 1
+array: resd 50
+even: resw 1
+odd: resw 1
+counter: resd 1
+
+section .text
+global _start:
+_start:
+
+call read_num
+mov cx, word[num]
+mov word[n], cx
+
+mov ebx, array
+mov eax, 0
+
+call read_array
+
+
+
+mov ecx, array
+;mov eax, 0
+
+
+mov word[odd], 0
+mov word[even], 0
+mov eax,dword[n]
+mov dword[counter], eax
+
+;mov ax, 0
+traverse:
+;mov cx,word[ebx+2*eax]
+;mov word[num],cx
+;call print_num
+
+;mov ax, word[num]
+mov eax, dword[ecx]
+mov ebx, 2
+mov edx, 0
+div ebx
+cmp edx, 0
+je ev_en
+add word[odd], 1
+jmp f1
+
+ev_en:
+add word[even], 1
+
+f1:
+add ecx, 2
+dec dword[counter]
+cmp dword[counter], 0
+jne traverse
+
+
+
+mov eax, 4
+mov ebx, 1
+mov ecx, msg1
+mov edx, l1
+int 80h
+
+mov cx, word[even]
+mov word[num], cx
+call print_num
+
+mov eax, 4
+mov ebx, 1
+mov ecx, msg2
+mov edx, l2
+int 80h
+
+mov cx, word[odd]
+mov word[num], cx
+call print_num
+
+
+mov eax,1
+mov ebx,0
+int 80h
+
+
+
+read_num:
+pusha
+mov word[num], 0
+
+loop_read:
+mov eax, 3
+mov ebx, 0
+mov ecx, temp
+mov edx, 1
+int 80h
+
+cmp byte[temp], 10
+je end_read
+mov ax, word[num]
+mov bx, 10
+mul bx
+
+mov bl, byte[temp]
+sub bl, 30h
+mov bh, 0
+add ax, bx
+mov word[num], ax
+jmp loop_read
+
+end_read:
+popa
+ret
+
+print_num:
+mov byte[count], 0
+pusha
+
+extract:
+cmp word[num], 0
+je print_no
+inc byte[count]
+mov dx, 0
+mov ax, word[num]
+mov bx, 10
+div bx
+push dx
+mov word[num], ax
+jmp extract
+
+print_no:
+cmp byte[count], 0
+je end_print
+dec byte[count]
+pop dx
+mov byte[temp], dl
+add byte[temp], 30h
+mov eax, 4
+mov ebx, 1
+mov ecx, temp
+mov edx, 1
+int 80h
+jmp print_no
+
+end_print:
+mov eax, 4
+mov ebx, 1
+mov ecx, newline
+mov edx, 1
+int 80h
+
+popa 
+ret
+
+read_array:
+pusha
+read_loop:
+call read_num
+mov cx,word[num]
+mov word[ebx+2*eax],cx
+inc eax
+
+cmp eax,dword[n]
+je end1_read
+jmp read_loop
+end1_read:
+popa
+ret
+
+
+; print_array:
+; pusha
+; print_loop:
+; cmp eax,dword[n]
+; je end1_print
+; mov cx,word[ebx+2*eax]
+; mov word[num],cx
+
+; call print_num
+; inc eax
+; jmp print_loop
+; end1_print:
+; popa
+; ret
+
+
+
+
+
+
+
+Q2)
+section .data
+newline:db 10
+msg1:db 'sum'
+l1: equ $-msg1
+
+
+section .bss
+num: resw 1
+n: resd 1
+temp: resb 1
+count: resb 1
+array: resw 50
+sum: resw 1
+counter: resw 1
+
+section .text
+global _start:
+_start:
+
+call read_num
+mov cx, word[num]
+mov word[n], cx
+
+mov ebx, array
+
+
+call read_array
+
+mov ebx, array
+
+
+mov word[sum], 0
+mov word[counter], 0
+
+adding:
+mov cx, word[ebx]
+add word[sum], cx
+add ebx, 2
+inc word[counter]
+mov dx, word[counter]
+cmp dx, word[n]
+je f
+jmp adding
+
+
+f:
+mov eax, 4
+mov ebx, 1
+mov ecx, msg1
+mov edx, l1
+int 80h
+
+mov cx, word[sum]
+mov word[num], cx
+call print_num
+
+
+mov eax,1
+mov ebx,0
+int 80h
+
+
+
+read_num:
+pusha
+mov word[num], 0
+
+loop_read:
+mov eax, 3
+mov ebx, 0
+mov ecx, temp
+mov edx, 1
+int 80h
+
+cmp byte[temp], 10
+je end_read
+mov ax, word[num]
+mov bx, 10
+mul bx
+
+mov bl, byte[temp]
+sub bl, 30h
+mov bh, 0
+add ax, bx
+mov word[num], ax
+jmp loop_read
+
+end_read:
+popa
+ret
+
+print_num:
+mov byte[count], 0
+pusha
+
+extract:
+cmp word[num], 0
+je print_no
+inc byte[count]
+mov dx, 0
+mov ax, word[num]
+mov bx, 10
+div bx
+push dx
+mov word[num], ax
+jmp extract
+
+print_no:
+cmp byte[count], 0
+je end_print
+dec byte[count]
+pop dx
+mov byte[temp], dl
+add byte[temp], 30h
+mov eax, 4
+mov ebx, 1
+mov ecx, temp
+mov edx, 1
+int 80h
+jmp print_no
+
+end_print:
+mov eax, 4
+mov ebx, 1
+mov ecx, newline
+mov edx, 1
+int 80h
+
+popa 
+ret
+
+read_array:
+pusha
+read_loop:
+call read_num
+mov cx,word[num]
+mov word[ebx+2*eax],cx
+inc eax
+
+cmp eax,dword[n]
+je end1_read
+jmp read_loop
+end1_read:
+popa
+ret
+
+
+print_array:
+pusha
+print_loop:
+cmp eax,dword[n]
+je end1_print
+mov cx,word[ebx+2*eax]
+mov word[num],cx
+
+call print_num
+inc eax
+jmp print_loop
+end1_print:
+popa
+ret
+
+
+Q4)
+section .data
+newline:db 10
+msg1:db 'found'
+l1: equ $-msg1
+msg2:db 'not found'
+l2: equ $-msg2
+
+section .bss
+num: resw 1
+n: resd 1
+temp: resb 1
+count: resb 1
+array: resw 50
+key: resw 1
+counter: resw 1
+
+section .text
+global _start:
+_start:
+
+call read_num
+mov cx, word[num]
+mov word[n], cx
+
+mov ebx, array
+mov eax, 0
+
+call read_array
+
+call read_num
+mov cx, word[num]
+mov word[key], cx
+
+mov ebx, array
+mov cx, word[n]
+mov word[counter], cx
+
+search:
+mov cx, word[ebx]
+cmp cx, word[key]
+je found
+
+
+add ebx, 2
+dec dword[counter]
+cmp dword[counter], 0
+jne search
+
+mov eax, 4
+mov ebx, 1
+mov ecx, msg2
+mov edx, l2
+int 80h
+jmp end
+
+found:
+mov eax, 4
+mov ebx, 1
+mov ecx, msg1
+mov edx, l1
+int 80h
+
+
+end:
+mov eax,1
+mov ebx,0
+int 80h
+
+
+
+read_num:
+pusha
+mov word[num], 0
+
+loop_read:
+mov eax, 3
+mov ebx, 0
+mov ecx, temp
+mov edx, 1
+int 80h
+
+cmp byte[temp], 10
+je end_read
+mov ax, word[num]
+mov bx, 10
+mul bx
+
+mov bl, byte[temp]
+sub bl, 30h
+mov bh, 0
+add ax, bx
+mov word[num], ax
+jmp loop_read
+
+end_read:
+popa
+ret
+
+print_num:
+mov byte[count], 0
+pusha
+
+extract:
+cmp word[num], 0
+je print_no
+inc byte[count]
+mov dx, 0
+mov ax, word[num]
+mov bx, 10
+div bx
+push dx
+mov word[num], ax
+jmp extract
+
+print_no:
+cmp byte[count], 0
+je end_print
+dec byte[count]
+pop dx
+mov byte[temp], dl
+add byte[temp], 30h
+mov eax, 4
+mov ebx, 1
+mov ecx, temp
+mov edx, 1
+int 80h
+jmp print_no
+
+end_print:
+mov eax, 4
+mov ebx, 1
+mov ecx, newline
+mov edx, 1
+int 80h
+
+popa 
+ret
+
+read_array:
+pusha
+read_loop:
+call read_num
+mov cx,word[num]
+mov word[ebx+2*eax],cx
+inc eax
+
+cmp eax,dword[n]
+je end1_read
+jmp read_loop
+end1_read:
+popa
+ret
+
+
+; print_array:
+; pusha
+; print_loop:
+; cmp eax,dword[n]
+; je end1_print
+; mov cx,word[ebx+2*eax]
+; mov word[num],cx
+
+; call print_num
+; inc eax
+; jmp print_loop
+; end1_print:
+; popa
+; ret
+
+
+
+
+Q5)
+
+section .data
+msg1: db 'enter'
+l1: equ $-msg1
+msg2: db 'high'
+l2: equ $-msg2
+msg3: db 'low'
+l3: equ $-msg3
+newline db 10
+
+section .bss
+n: resd 1
+key: resw 1
+num: resw 1
+temp: resb 1
+count: resb 1
+array: resw 50
+high: resw 1
+low: resw 1
+sum: resw 1
+
+section .text
+global _start:
+_start:
+
+mov eax, 4
+mov ebx, 1
+mov ecx, msg1
+mov edx, l1
+int 80h
+
+call read_num
+mov cx, word[num]
+mov word[n], cx
+
+mov ebx, array
+mov eax, 0
+call read_array
+
+
+mov word[high], 0
+mov word[low], 999
+mov ebx, array
+mov eax, 0
+trav:
+mov dx, word[ebx+2*eax]
+cmp dx, word[high]
+ja higher
+f1:
+cmp dx, word[low]
+jb lower
+jmp f2
+higher:
+mov word[high], dx
+jmp f1
+lower:
+mov word[low], dx
+f2:
+inc eax
+cmp eax, dword[n]
+je end_trav
+jmp trav
+
+end_trav:
+mov eax, 4
+mov ebx, 1
+mov ecx, msg2
+mov edx, l2
+int 80h
+
+mov cx, word[high]
+mov word[num], cx
+call print_num
+
+
+mov eax, 4
+mov ebx, 1
+mov ecx, msg3
+mov edx, l3
+int 80h
+
+mov cx, word[low]
+mov word[num], cx
+call print_num
+
+end:
+mov eax, 1
+mov ebx, 0
+int 80h
+
+print_array:
+pusha
+print_array_loop:
+mov cx, word[ebx+2*eax]
+mov word[num], cx
+call print_num
+inc eax
+cmp eax, dword[n]
+je end_print_array
+jmp print_array_loop
+
+end_print_array:
+popa
+ret
+
+read_array:
+pusha
+read_array_loop:
+call read_num
+mov cx, word[num]
+mov word[ebx+2*eax], cx
+
+inc eax
+cmp eax, dword[n]
+je end_array_loop
+jmp read_array_loop
+end_array_loop:
+popa
+ret
+
+
+read_num:
+pusha
+mov word[num], 0
+read_loop:
+mov eax, 3
+mov ebx, 0
+mov ecx, temp
+mov edx, 1
+int 80h
+
+cmp byte[temp], 10
+je end_read
+mov ax, word[num]
+mov bx, 10
+mul bx
+
+mov bl, byte[temp]
+sub bl, 30h
+mov bh, 0
+add ax, bx
+mov word[num], ax
+jmp read_loop
+
+end_read:
+popa
+ret
+
+print_num:
+pusha
+mov byte[count], 0
+
+extract:
+cmp word[num], 0
+je print_no
+inc byte[count]
+mov dx, 0
+mov ax, word[num]
+mov bx, 10
+div bx
+push dx
+mov word[num], ax
+jmp extract
+
+print_no:
+cmp byte[count], 0
+je end_print
+dec byte[count]
+pop dx
+mov byte[temp], dl
+add byte[temp], 30h
+mov eax, 4
+mov ebx, 1
+mov ecx, temp
+mov edx, 1
+int 80h
+jmp print_no
+
+end_print:
+mov eax, 4
+mov ebx, 1
+mov ecx, newline
+mov edx, 1
+int 80h
+popa
+ret
+
+
+
+
+
+
+
+
+
+Q6)
+section .bss
+num: resw 1 ;For storing a number, to be read of printed....
+nod: resb 1 ;For storing the number of digits....
+temp: resb 2
+matrix1: resw 200
+matrix2: resw 200
+sum: resw 200
+m: resw 1
+n: resw 1
+i: resw 1
+j: resw 1
+count: resw 1
+
+section .data
+msg1: db "Enter the number of rows in the matrix : "
+msg_size1: equ $-msg1
+msg2: db "Enter the elements one by one(row by row) : "
+msg_size2: equ $-msg2
+msg3: db "Enter the number of columns in the matrix : "
+msg_size3: equ $-msg3
+tab: db 9 ;ASCII for vertical tab
+new_line: db 10 ;ASCII for new line
+section .text
+global _start
+_start:
+mov eax, 4
+mov ebx, 1
+mov ecx, msg1
+mov edx, msg_size1
+int 80h
+
+call read_num
+mov cx, word[num]      ;row
+mov word[m], cx
+
+
+
+mov eax, 4
+mov ebx, 1
+mov ecx, msg3
+mov edx, msg_size3
+int 80h
+call read_num
+mov cx, word[num]              ;column
+mov word[n], cx
+
+
+mov eax, 4
+mov ebx, 1
+mov ecx, msg2
+mov edx, msg_size2
+int 80h
+;Reading each element of the matrix........
+mov eax, 0
+mov ebx, matrix1
+mov word[i], 0
+mov word[j], 0
+i_loop:
+mov word[j], 0
+j_loop:
+call read_num
+mov dx , word[num]
+;eax will contain the array index and each element is 2 bytes(1 word) long
+mov word[ebx + 2 * eax], dx
+inc eax ;Incrementing array index by one....
+inc word[j]
+mov cx, word[j]
+cmp cx, word[n]
+jb j_loop
+inc word[i]
+mov cx, word[i]
+cmp cx, word[m]
+jb i_loop
+
+
+mov eax, 4
+mov ebx, 1
+mov ecx, msg2
+mov edx, msg_size2
+int 80h
+;Reading each element of the matrix........
+mov eax, 0
+mov ebx, matrix2
+mov word[i], 0
+mov word[j], 0
+i_loop1:
+mov word[j], 0
+j_loop1:
+call read_num
+mov dx , word[num]
+;eax will contain the array index and each element is 2 bytes(1 word) long
+mov word[ebx + 2 * eax], dx
+inc eax ;Incrementing array index by one....
+inc word[j]
+mov cx, word[j]
+cmp cx, word[n]
+jb j_loop1
+inc word[i]
+mov cx, word[i]
+cmp cx, word[m]
+jb i_loop1
+
+
+
+;adding
+; mov eax, 0
+mov ebx, matrix1
+mov eax, matrix2
+; mov ecx, matrix2
+; mov edx, sum
+mov word[i], 0
+mov word[j], 0
+i_loops2:
+mov word[j], 0
+j_loops2:
+;eax will contain the array index and each element is 2 bytes(1 word) long
+
+pusha
+mov dx, word[ebx]
+add dx, word[eax]
+; mov word[edx+2*eax], dx
+mov word[num], dx
+call print_num
+
+pusha
+mov eax, 4
+mov ebx, 1
+mov ecx, tab
+mov edx, 1
+int 80h
+popa
+
+add ebx, 2
+add eax, 2
+inc word[j]
+mov cx, word[j]
+cmp cx, word[n]
+jb j_loops2
+
+pusha
+mov eax, 4
+mov ebx, 1
+mov ecx, new_line
+mov edx, 1
+int 80h
+popa
+
+inc word[i]
+mov cx, word[i]
+cmp cx, word[m]
+jb i_loops2
+popa
+
+
+
+; printing sum
+; mov eax, 0
+; mov ebx, sum
+; mov word[i], 0
+; mov word[j], 0
+; i_loop2:
+; mov word[j], 0
+; j_loop2:
+; ;eax will contain the array index and each element is 2 bytes(1 word) long
+; mov dx, word[ebx + 2 * eax] ;
+; mov word[num] , dx
+; call print_num
+; ;Printing a space after each element.....
+; pusha
+; mov eax, 4
+; mov ebx, 1
+; mov ecx, tab
+; mov edx, 1
+; int 80h
+; popa
+; inc eax
+; inc word[j]
+; mov cx, word[j]
+; cmp cx, word[n]
+; jb j_loop2
+; pusha
+; mov eax, 4
+; mov ebx, 1
+; mov ecx, new_line
+; mov edx, 1
+; int 80h
+; popa
+; inc word[i]
+; mov cx, word[i]
+; cmp cx, word[m]
+; jb i_loop2
+
+;Exit System Call.....
+exit:
+mov eax, 1
+mov ebx, 0
+int 80h
+
+
+
+read_num:
+pusha
+mov word[num], 0
+
+loop_read:
+mov eax, 3
+mov ebx, 0
+mov ecx, temp
+mov edx, 1
+int 80h
+
+cmp byte[temp], 10
+je end_read
+mov ax, word[num]
+mov bx, 10
+mul bx
+
+mov bl, byte[temp]
+sub bl, 30h
+mov bh, 0
+add ax, bx
+mov word[num], ax
+jmp loop_read
+
+end_read:
+popa
+ret
+
+print_num:
+mov byte[count], 0
+pusha
+
+extract:
+cmp word[num], 0
+je print_no
+inc byte[count]
+mov dx, 0
+mov ax, word[num]
+mov bx, 10
+div bx
+push dx
+mov word[num], ax
+jmp extract
+
+print_no:
+cmp byte[count], 0
+je end_print
+dec byte[count]
+pop dx
+mov byte[temp], dl
+add byte[temp], 30h
+mov eax, 4
+mov ebx, 1
+mov ecx, temp
+mov edx, 1
+int 80h
+jmp print_no
+
+end_print:
+mov eax, 4
+mov ebx, 1
+mov ecx, new_line
+mov edx, 1
+int 80h
+
+popa 
+ret
+
+
+
+Q7)
+section .data
+newline:db 10
+msg1:db 'enter'
+l1: equ $-msg1
+
+msg2:db 'not a palin'
+l2: equ $-msg2
+
+msg3:db 'palin'
+l3: equ $-msg3
+
+section .bss
+num: resw 1
+n: resd 1
+temp: resb 1
+count: resb 1
+string: resb 50
+str_len: resd 1
+i: resd 1
+j: resd 1
+
+section .text
+global _start:
+_start:
+
+mov eax, 4
+mov ebx, 1
+mov ecx, msg1
+mov edx, l1
+int 80h
+
+mov ebx, string
+mov dword[str_len], 0
+call read_string
+
+
+
+dec dword[str_len]
+mov eax, string
+add eax, dword[str_len]
+mov ebx, string
+trav:
+mov cl, byte[ebx]
+cmp cl, byte[eax]
+jne not_pal
+inc ebx
+dec eax
+cmp byte[ebx], 0
+je pal
+jmp trav
+
+not_pal:
+mov eax, 4
+mov ebx, 1
+mov ecx, msg2
+mov edx, l2
+int 80h
+jmp end
+
+pal:
+mov eax, 4
+mov ebx, 1
+mov ecx, msg3
+mov edx, l3
+int 80h
+
+end:
+mov eax, 1
+mov ebx, 0
+int 80h
+
+read_string:
+pusha
+read:
+pusha
+mov eax, 3
+mov ebx, 0
+mov ecx, temp
+mov edx, 1
+int 80h
+popa
+cmp byte[temp], 10
+je end_read
+inc dword[str_len]
+mov al, byte[temp]
+mov byte[ebx], al
+inc ebx
+jmp read
+end_read:
+mov byte[ebx], 0
+popa
+ret
+
+print_string:
+pusha
+print:
+mov al, byte[ebx]
+mov byte[temp], al
+cmp byte[temp], 0
+je end_print
+pusha
+mov eax, 4
+mov ebx, 1
+mov ecx, temp
+mov edx, 1
+int 80h
+popa
+inc ebx
+jmp print
+end_print:
+popa
+ret
+
+
+
+Q9)
+
+section .data
+newline: db 10
+msg1: db 'enter'
+l1: equ $-msg1
+
+section .bss
+string1: resb 50
+string2: resb 50
+temp: resb 1
+
+section .text
+global _start:
+_start:
+
+mov ebx, string1
+call read_string
+
+mov ebx, string2
+call read_string
+
+mov eax, string1
+mov ebx, string2
+compare:
+mov cl, byte[eax]
+cmp cl, byte[ebx]
+ja str2
+cmp cl, byte[ebx]
+jb str1
+inc eax
+inc ebx
+jmp compare
+
+str2:
+mov ebx, string2
+call print_string
+pusha
+mov eax, 4
+mov ebx, 1
+mov ecx, newline
+mov edx, 1
+int 80h
+popa
+mov ebx, string1
+call print_string
+jmp end
+
+str1:
+mov ebx, string1
+call print_string
+pusha
+mov eax, 4
+mov ebx, 1
+mov ecx, newline
+mov edx, 1
+int 80h
+popa
+mov ebx, string2
+call print_string
+
+end:
+mov eax, 1
+mov ebx, 0
+int 80h
+
+read_string:
+pusha
+read:
+pusha
+mov eax, 3
+mov ebx, 0
+mov ecx, temp
+mov edx, 1
+int 80h
+popa
+cmp byte[temp], 10
+je end_read
+mov al, byte[temp]
+mov byte[ebx], al
+inc ebx
+jmp read
+end_read:
+mov byte[ebx], 0
+popa
+ret
+
+print_string:
+pusha
+print:
+mov al, byte[ebx]
+mov byte[temp], al
+cmp byte[temp], 0
+je end_print
+pusha
+mov eax, 4
+mov ebx, 1
+mov ecx, temp
+mov edx, 1
+int 80h
+popa
+inc ebx
+jmp print
+end_print:
+popa
+ret
+
+
+
+
+
+
+
+Q10)
+
+section .data
+string_len: db 0
+
+section .bss
+string: resb 50
+temp: resb 1
+sym: resb 1
+count: resw 1
+; string_len: resb 1
+
+section .text
+global _start:
+_start:
+
+
+mov ebx, string
+
+call read_array
+
+mov eax, 3
+mov ebx, 0
+mov ecx, sym
+mov edx, 1
+int 80h
+; sub byte[sym], 30h
+
+
+mov ebx, string
+mov word[count], 0
+counting:
+
+mov al, byte[ebx]
+
+cmp al, 0 
+je end_count
+cmp al, byte[sym]
+je plus
+jmp f
+
+plus:
+inc word[count]
+
+f:
+inc ebx
+jmp counting
+end_count:
+
+add word[count], 30h
+mov eax, 4
+mov ebx, 1
+mov ecx, count
+mov edx, 1
+int 80h
+
+mov eax, 1
+mov ebx, 0
+int 80h
+
+read_array:
+pusha
+reading:
+push ebx
+mov eax, 3
+mov ebx, 0
+mov ecx, temp
+mov edx, 1
+int 80h
+pop ebx
+cmp byte[temp], 10 ;; check if the input is ’Enter’
+je end_reading
+inc byte[string_len]
+mov al,byte[temp]
+mov byte[ebx], al
+inc ebx
+jmp reading
+end_reading:
+;; Similar to putting a null character at the end of a string
+mov byte[ebx], 0
+mov ebx, string
+popa
+ret
+
+
+print_array:
+pusha
+mov ebx, string
+printing:
+mov al, byte[ebx]
+mov byte[temp], al
+cmp byte[temp], 0 ;; checks if the character is NULL character
+je end_printing
+push ebx
+mov eax, 4
+mov ebx, 1
+mov ecx, temp
+mov edx, 1
+int 80h
+pop ebx
+inc ebx
+jmp printing
+end_printing:
+popa
+ret
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,285 @@
+section .data
+string_len: db 0
+
+section .bss
+string: resb 50
+temp: resb 1
+; string_len: resb 1
+
+section .text
+global _start:
+_start:
+
+
+mov ebx, string
+
+call read_array
+
+
+mov ebx, string
+
+; add byte[string_len], 30h
+; mov eax, 4
+; mov ebx, 1
+; mov ecx, string_len
+; mov edx, 1
+; int 80h
+
+call print_array
+
+mov eax, 1
+mov ebx, 0
+int 80h
+
+read_array:
+pusha
+reading:
+push ebx
+mov eax, 3
+mov ebx, 0
+mov ecx, temp
+mov edx, 1
+int 80h
+pop ebx
+cmp byte[temp], 10 ;; check if the input is ’Enter’
+je end_reading
+inc byte[string_len]
+mov al,byte[temp]
+mov byte[ebx], al
+inc ebx
+jmp reading
+end_reading:
+;; Similar to putting a null character at the end of a string
+mov byte[ebx], 0
+mov ebx, string
+popa
+ret
+
+
+print_array:
+pusha
+mov ebx, string
+printing:
+mov al, byte[ebx]
+mov byte[temp], al
+cmp byte[temp], 0 ;; checks if the character is NULL character
+je end_printing
+push ebx
+mov eax, 4
+mov ebx, 1
+mov ecx, temp
+mov edx, 1
+int 80h
+pop ebx
+inc ebx
+jmp printing
+end_printing:
+popa
+ret
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+section .data
+string_len1: db 0
+string_len2: db 0
+
+section .bss
+string: resb 50
+string1: resb 50
+string2: resb 50
+temp: resb 1
+; string_len: resb 1
+
+section .text
+global _start:
+_start:
+
+
+mov ebx, string1
+read_array:
+pusha
+reading:
+push ebx
+mov eax, 3
+mov ebx, 0
+mov ecx, temp
+mov edx, 1
+int 80h
+pop ebx
+cmp byte[temp], 10 ;; check if the input is ’Enter’
+je end_reading
+inc byte[string_len1]
+mov al,byte[temp]
+mov byte[ebx], al
+inc ebx
+jmp reading
+end_reading:
+;; Similar to putting a null character at the end of a string
+mov byte[ebx], 0
+mov ebx, string1
+popa
+
+
+
+mov ecx, string2
+read1_array:
+pusha
+reading1:
+push ecx
+mov eax, 3
+mov ebx, 0
+mov ecx, temp
+mov edx, 1
+int 80h
+pop ecx
+cmp byte[temp], 10 ;; check if the input is ’Enter’
+je end_reading
+inc byte[string_len2]
+mov al,byte[temp]
+mov byte[ecx], al
+inc ecx
+jmp reading
+end1_reading:
+;; Similar to putting a null character at the end of a string
+mov byte[ecx], 0
+mov ecx, string2
+popa
+
+
+
+mov ebx, string1
+print_array:
+pusha
+mov ebx, string1
+printing:
+mov al, byte[ebx]
+mov byte[temp], al
+cmp byte[temp], 0 ;; checks if the character is NULL character
+je end_printing
+push ebx
+mov eax, 4
+mov ebx, 1
+mov ecx, temp
+mov edx, 1
+int 80h
+pop ebx
+inc ebx
+jmp printing
+end_printing:
+popa
+
+
+; add byte[string_len], 30h
+; mov eax, 4
+; mov ebx, 1
+; mov ecx, string_len
+; mov edx, 1
+; int 80h
+
+
+mov eax, 1
+mov ebx, 0
+int 80h
+
+; read_array:
+; pusha
+; reading:
+; push ebx
+; mov eax, 3
+; mov ebx, 0
+; mov ecx, temp
+; mov edx, 1
+; int 80h
+; pop ebx
+; cmp byte[temp], 10 ;; check if the input is ’Enter’
+; je end_reading
+; inc byte[string_len]
+; mov al,byte[temp]
+; mov byte[ebx], al
+; inc ebx
+; jmp reading
+; end_reading:
+; ;; Similar to putting a null character at the end of a string
+; mov byte[ebx], 0
+; mov ebx, string
+; popa
+; ret
+
+
+; print_array:
+; pusha
+; mov ebx, string
+; printing:
+; mov al, byte[ebx]
+; mov byte[temp], al
+; cmp byte[temp], 0 ;; checks if the character is NULL character
+; je end_printing
+; push ebx
+; mov eax, 4
+; mov ebx, 1
+; mov ecx, temp
+; mov edx, 1
+; int 80h
+; pop ebx
+; inc ebx
+; jmp printing
+; end_printing:
+; popa
+; ret
+
+
+

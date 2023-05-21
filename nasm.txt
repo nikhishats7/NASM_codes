@@ -1,0 +1,556 @@
+
+          
+          
+          
+          
+          
+          
+
+
+
+
+
+
+
+
+section .data
+msg1: db 'enter'
+l1: equ $-msg1
+
+iso: db 'iso'
+l2: equ $-iso
+
+right: db 'right'
+l3: equ $-right
+
+not1: db 'not'
+l4: equ $-not1
+
+section .bss
+num1: resw 1
+num2: resw 1
+num3: resw 1
+num: resw 1
+temp: resb 10
+count: resb 10
+
+section .text
+global _start:
+_start:
+mov eax, 4
+mov ebx, 1
+mov ecx, msg1
+mov edx, l1
+int 80h
+
+call read_num
+mov cx, word[num]
+mov word[num1], cx
+
+mov eax, 4
+mov ebx, 1
+mov ecx, msg1
+mov edx, l1
+int 80h
+
+call read_num
+mov cx, word[num]
+mov word[num2], cx
+
+mov eax, 4
+mov ebx, 1
+mov ecx, msg1
+mov edx, l1
+int 80h
+
+call read_num
+mov cx, word[num]
+mov word[num3], cx
+
+mov ax, word[num1]
+cmp ax, word[num2]
+je f1
+f2:
+jmp next
+f1:
+mov ax, word[num1]
+cmp ax, word[num3]
+je right
+f3:
+jmp print_iso
+
+next:
+mov ax, word[num1]
+cmp ax, word[num3]
+je f4
+f5:
+jmp next1
+f4:
+mov ax, word[num1]
+cmp ax, word[num3]
+je right
+f6:
+jmp print_iso
+
+next1:
+mov ax, word[num1]
+cmp ax, word[num3]
+je f7
+f8:
+jmp right
+f7:
+mov ax, word[num1]
+cmp ax, word[num3]
+je right
+f9:
+jmp print_iso
+
+
+right:
+mov ax, word[num1]
+mov bl, byte[num1]
+mul ax
+mov word[p1], ax
+
+mov ax, word[num2]
+mov bl, byte[num2]
+mul ax
+mov word[p2], ax
+
+mov ax, word[num3]
+mov bl, byte[num3]
+mul ax
+mov word[p3], ax
+
+mov ax, word[p1]
+add ax, word[p2]
+cmp ax, word[p3]
+je print_right
+
+mov ax, word[p1]
+add ax, word[p2]
+cmp ax, word[p3]
+je print_right
+
+mov ax, word[p1]
+add ax, word[p2]
+cmp ax, word[p3]
+je print_right
+mov eax, 4
+mov ebx, 1
+mov ecx, not1
+mov edx, l4
+int 80h
+jmp end
+
+
+print_right:
+mov eax, 4
+mov ebx, 1
+mov ecx, right
+mov edx, l3
+int 80h
+jmp end
+
+
+print_iso:
+mov eax, 4
+mov ebx, 1
+mov ecx, iso
+mov edx, l2
+int 80h
+jmp end
+
+end:
+mov eax, 1
+mov ebx, 0
+int 80h
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+print_num:
+mov byte[count], 0
+pusha
+
+extract:
+cmp word[num], 0
+je print_no
+inc byte[count]
+mov dx, 0
+mov ax, word[num]
+mov bx, 10
+div bx
+push dx
+mov word[num], ax
+jmp extract
+
+print_no:
+cmp byte[count], 0
+je end_print
+dec byte[count]
+pop dx
+mov byte[temp], dl
+add byte[temp], 30h
+mov eax, 4
+mov ebx, 1
+mov ecx, temp
+mov edx, 1
+int 80h
+jmp print_no
+
+end_print:
+mov eax, 4
+mov ebx, 1
+mov ecx, newline
+mov edx, 1
+int 80h
+
+popa
+ret
+
+read_num:
+pusha
+mov word[num], 0
+
+loop_read:
+mov eax, 3
+mov ebx, 0
+mov ecx, temp
+mov edx, 1
+int 80h
+
+cmp byte[temp], 10
+je end_read
+
+mov ax, word[num]
+mov bx, 10
+mul bx
+
+mov bl, byte[temp]
+sub bl, 30h
+mov bh, 0
+add ax, bx
+mov word[num], ax
+jmp loop_read
+
+end_read:
+popa
+ret
+
+
+; gp or not
+; ap or not
+section .data
+msg1: db 'enter'
+l1: equ $-msg1
+
+gp: db 'gp'
+l2: equ $-gp
+
+notgp: db 'notgp'
+l3: equ $-notgp
+
+section .bss
+n: resb 1
+num1: resb 1
+num: resb 1
+ratio: resb 1
+counter: resb 1
+junk: resb 1
+
+section .text
+global _start:
+_start:
+
+mov eax, 4
+mov ebx, 1
+mov ecx, msg1
+mov edx, l1
+int 80h
+
+mov eax, 3
+mov ebx, 0
+mov ecx, n
+mov edx, 1
+int 80h
+
+mov eax, 3
+mov ebx, 0
+mov ecx, junk
+mov edx, 1
+int 80h
+sub byte[n], 30h
+
+mov byte[counter], 0
+
+
+for:
+mov eax, 4
+mov ebx, 1
+mov ecx, msg1
+mov edx, l1
+int 80h
+
+mov eax, 3
+mov ebx, 0
+mov ecx, num
+mov edx, 1
+int 80h
+
+mov eax, 3
+mov ebx, 0
+mov ecx, junk
+mov edx, 1
+int 80h
+sub byte[num], 30h
+cmp byte[counter], 0
+je f0
+cmp byte[counter], 1
+je f1
+cmp byte[counter], 1
+ja f2
+
+mov al, byte[num]
+mov byte[num1], al
+
+
+f1:
+mov ax, word[num]
+mov ah, 0
+div byte[num1]
+mov byte[ratio], al
+jmp f0
+
+f2:
+mov ax, word[num]
+mov ah, 0
+div byte[num1]
+cmp byte[ratio], al
+jne print
+jmp f0
+
+f0:
+mov al, byte[num]
+mov byte[num1], al
+add byte[counter], 1
+mov al, byte[counter]
+cmp al, byte[n]
+jb for
+
+mov eax, 4
+mov ebx, 1
+mov ecx, gp
+mov edx, l2
+int 80h
+jmp end
+
+
+print:
+add byte[counter], 1
+mov al, byte[counter]
+cmp al, byte[n]
+jb for1
+f4:
+jmp not_gp
+for1:
+mov eax, 4
+mov ebx, 1
+mov ecx, msg1
+mov edx, l1
+int 80h
+
+mov eax, 3
+mov ebx, 0
+mov ecx, num
+mov edx, 1
+int 80h
+
+mov eax, 3
+mov ebx, 0
+mov ecx, junk
+mov edx, 1
+int 80h
+sub byte[num], 30h
+add byte[counter], 1
+mov al, byte[counter]
+cmp al, byte[n]
+jb for1
+
+not_gp:
+mov eax, 4
+mov ebx, 1
+mov ecx, notgp
+mov edx, l3
+int 80h
+
+end:
+mov eax, 1
+mov ebx, 0
+int 80h
+
+
+; ap or not
+section .data
+msg1: db 'enter'
+l1: equ $-msg1
+
+ap: db 'ap'
+l2: equ $-ap
+
+notap: db 'notap'
+l3: equ $-notap
+
+section .bss
+n: resb 1
+num1: resb 1
+num: resb 1
+diff: resb 1
+counter: resb 1
+junk: resb 1
+
+section .text
+global _start:
+_start:
+
+mov eax, 4
+mov ebx, 1
+mov ecx, msg1
+mov edx, l1
+int 80h
+
+mov eax, 3
+mov ebx, 0
+mov ecx, n
+mov edx, 1
+int 80h
+
+mov eax, 3
+mov ebx, 0
+mov ecx, junk
+mov edx, 1
+int 80h
+sub byte[n], 30h
+
+mov byte[counter], 0
+
+
+for:
+mov eax, 4
+mov ebx, 1
+mov ecx, msg1
+mov edx, l1
+int 80h
+
+mov eax, 3
+mov ebx, 0
+mov ecx, num
+mov edx, 1
+int 80h
+
+mov eax, 3
+mov ebx, 0
+mov ecx, junk
+mov edx, 1
+int 80h
+sub byte[num], 30h
+cmp byte[counter], 0
+je f0
+cmp byte[counter], 1
+je f1
+cmp byte[counter], 1
+ja f2
+
+mov al, byte[num]
+mov byte[num1], al
+
+
+f1:
+mov al, byte[num1]
+sub al, byte[num]
+mov byte[diff], al
+jmp f0
+
+f2:
+mov al, byte[num1]
+sub al, byte[num]
+cmp byte[diff], al
+jne print
+jmp f0
+
+f0:
+mov al, byte[num]
+mov byte[num1], al
+add byte[counter], 1
+mov al, byte[counter]
+cmp al, byte[n]
+jb for
+
+mov eax, 4
+mov ebx, 1
+mov ecx, ap
+mov edx, l2
+int 80h
+jmp end
+
+
+print:
+add byte[counter], 1
+mov al, byte[counter]
+cmp al, byte[n]
+jb for1
+f4:
+jmp not_ap
+for1:
+mov eax, 4
+mov ebx, 1
+mov ecx, msg1
+mov edx, l1
+int 80h
+
+mov eax, 3
+mov ebx, 0
+mov ecx, num
+mov edx, 1
+int 80h
+
+mov eax, 3
+mov ebx, 0
+mov ecx, junk
+mov edx, 1
+int 80h
+sub byte[num], 30h
+add byte[counter], 1
+mov al, byte[counter]
+cmp al, byte[n]
+jb for1
+
+not_ap:
+mov eax, 4
+mov ebx, 1
+mov ecx, notap
+mov edx, l3
+int 80h
+
+end:
+mov eax, 1
+mov ebx, 0
+int 80h
+
+
+
+
+
